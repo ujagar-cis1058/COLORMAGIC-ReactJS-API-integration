@@ -6,7 +6,7 @@ export interface beerState {
   breeds: any;
   catDetails: any;
   favoriteBeer: any;
-  homeBeer: any;
+  homeBreed: any;
   error: any;
 }
 
@@ -16,7 +16,7 @@ const initialState: beerState = {
   breeds: [],
   catDetails: [],
   favoriteBeer: [],
-  homeBeer: [],
+  homeBreed: [],
   error: "",
 };
 
@@ -35,6 +35,25 @@ export const fetchBreed = createAsyncThunk(
   }
 );
 
+// action
+// const showlist = (showlist) => {
+//   return {
+//     type: "number",
+//     payload: 1
+//   };
+// };
+
+// // reducer
+// const initialState = {};
+
+// const reducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case "number":
+//       return { ...state, showlist: action.payload };
+//     default:
+//       return state;
+//   }
+// };
 // export const fetchFilteredData = createAsyncThunk(
 //   "fetchFilteredData",
 //   async (food_pairing: string) => {
@@ -53,7 +72,7 @@ export const fetchFilteredData = createAsyncThunk(
   "fetchFilteredData",
   async (obj: any) => {
     try {
-      // console.log('breed_id',obj.id);
+      console.log('breed_id',obj);
       const res = await fetch(
         "https://api.thecatapi.com/v1/images/search?page=" + obj.page + "&limit=10&breed_id=" + obj.id
       ).then((data) => data.json());
@@ -69,10 +88,10 @@ export const fetchData = createAsyncThunk(
   "fetchData",
   async (obj: any) => {
     try {
-      console.log('breed_id', obj.id);
+      // console.log('breed_id', obj.id);
       const res = await fetch(
         "https://api.thecatapi.com/v1/images/search?page=" + obj.page + "&limit=10&breed_id=" + obj.id
-      ).then((data) => data.json());
+      ).then((data) => data.json());      
       return res;
     } catch (Error) {
       alert('Apologies but we could not load new cats for you at this time! Miau!')
@@ -83,7 +102,7 @@ export const fetchData = createAsyncThunk(
 
 export const fetchFilteredImageData = createAsyncThunk(
   "fetchFilteredImageData",
-  async (id: string) => {
+  async (id: string | undefined) => {
     try {
       const res = await fetch(
         "https://api.thecatapi.com/v1/images/" + id
@@ -97,17 +116,17 @@ export const fetchFilteredImageData = createAsyncThunk(
   }
 );
 
-// export const fetchHomeData = createAsyncThunk(
-//   "fetchHomeData",
-//   async (id: string | undefined) => {
-//     try {
+export const fetchHomeData = createAsyncThunk(
+  "fetchHomeData",
+  async (id: string | undefined) => {
+    try {
       
-//     } catch (Error) {
-//       alert('Apologies but we could not load new cats for you at this time! Miau!')
-//       console.error(Error);
-//     }
-//   }
-// );
+    } catch (Error) {
+      alert('Apologies but we could not load new cats for you at this time! Miau!')
+      console.error(Error);
+    }
+  }
+);
 
 export const beerSlice = createSlice({
   name: "beer",
@@ -139,6 +158,8 @@ export const beerSlice = createSlice({
     builder.addCase(fetchFilteredData.fulfilled, (state, action) => {
       state.loading = false;
       state.catList = [...state.catList, ...action.payload];
+      // state.catList = action.payload;
+      // console.log("catlist,,,,,,,,,,,,,,,,,,",state.catList)
       state.error = "";
     });
     builder.addCase(fetchFilteredData.rejected, (state, action) => {
@@ -176,7 +197,7 @@ export const beerSlice = createSlice({
     });
     builder.addCase(fetchData.rejected, (state, action) => {
       state.loading = false;
-      state.catList = state.catList || [];;
+      state.catList = state.catList || [];
       state.error = action.error.message;
     });
     //fetchFilteredImageData
@@ -193,7 +214,19 @@ export const beerSlice = createSlice({
     //   state.catDetails = [];
     //   state.error = action.error.message;
     // });
-   
+    builder.addCase(fetchHomeData.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(fetchHomeData.fulfilled, (state, action) => {
+      state.loading = false;
+      state.homeBreed = action.payload;
+      state.error = "";
+    });
+    builder.addCase(fetchHomeData.rejected, (state, action) => {
+      state.loading = false;
+      state.homeBreed = [];
+      state.error = action.error.message;
+    });
   },
 });
 
